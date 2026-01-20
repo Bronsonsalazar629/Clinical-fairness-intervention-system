@@ -317,6 +317,18 @@ def create_animated_causal_graph(causal_data, selected_node=None):
         'chronic_count': '#aa96da'
     }
 
+    def escape_js_string(s):
+        """Escape special characters in a string for use in JavaScript"""
+        s = s.replace('\\', '\\\\')  # Escape backslashes first
+        s = s.replace("'", "\\'")    # Escape single quotes
+        s = s.replace('"', '\\"')    # Escape double quotes
+        s = s.replace('\n', '\\n')   # Escape newlines
+        s = s.replace('\r', '\\r')   # Escape carriage returns
+        s = s.replace('\t', '\\t')   # Escape tabs
+        s = s.replace('\b', '\\b')   # Escape backspace
+        s = s.replace('\f', '\\f')   # Escape form feed
+        return s
+
     node_descriptions = {}
 
     node_list = list(nodes)
@@ -382,8 +394,10 @@ def create_animated_causal_graph(causal_data, selected_node=None):
             label = node.replace('_', ' ').title()
 
         title = f"{label}\\nClick for details"
+        label_safe = escape_js_string(label)
+        title_safe = escape_js_string(title)
 
-        js_nodes += f"{{id: '{node}', label: '{label}', color: '{color}', size: {size}, title: '{title}'}},"
+        js_nodes += "{id: '" + node + "', label: '" + label_safe + "', color: {background: '" + color + "', border: 'white'}, size: " + str(size) + ", title: '" + title_safe + "', font: {color: '#000000', size: 18, face: 'arial'} },"
     js_nodes += "]"
 
     js_edges = "["
@@ -415,21 +429,53 @@ def create_animated_causal_graph(causal_data, selected_node=None):
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css"/>
     <style>
+        * {{
+            background-color: #FFFFFF !important;
+        }}
+        body {{
+            background-color: #FFFFFF !important;
+            margin: 0;
+            padding: 0;
+        }}
         #mynetwork {{
             width: 100%;
             height: 800px;
             border: 1px solid #666666;
-            background: #000000;
+            background-color: #FFFFFF !important;
+            position: relative;
+        }}
+        #mynetwork::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF;
+            z-index: -1;
+            pointer-events: none;
+        }}
+        canvas {{
+            background-color: #FFFFFF !important;
+        }}
+        .vis-network {{
+            background-color: #FFFFFF !important;
+        }}
+        .vis-network canvas {{
+            background-color: #FFFFFF !important;
         }}
     </style>
 </head>
-<body>
+<body style="background-color: #FFFFFF;">
     <div id="mynetwork"></div>
 
     <script type="text/javascript">
         // Create data sets
         var nodes = new vis.DataSet({js_nodes});
         var edges = new vis.DataSet({js_edges});
+
+        console.log('Sample node:', nodes.get()[0]);
+        console.log('Total nodes:', nodes.length);
 
         // Create a network
         var container = document.getElementById('mynetwork');
@@ -442,23 +488,17 @@ def create_animated_causal_graph(causal_data, selected_node=None):
             nodes: {{
                 shape: 'dot',
                 size: 20,
-                color: {{
-                    border: '#222222',
-                    highlight: {{
-                        border: '#000000',
-                        background: '#FFFF82'
-                    }}
-                }},
                 font: {{
-                    size: 16,
-                    face: 'Arial'
+                    color: '#000000',  // Changed to black for better visibility on white background
+                    size: 14,
+                    face: 'arial'
                 }}
             }},
             edges: {{
                 width: 2,
                 color: {{
-                    color: '#848484',
-                    highlight: '#848484'
+                    color: '#666666',  // Changed to darker gray for visibility
+                    highlight: '#000000'  // Changed to black for visibility
                 }},
                 arrows: {{
                     to: {{enabled: true, scaleFactor: 1.5}}
@@ -466,6 +506,11 @@ def create_animated_causal_graph(causal_data, selected_node=None):
                 smooth: {{
                     type: 'curvedCW',
                     roundness: 0.2
+                }},
+                font: {{
+                    color: '#000000',  // Changed to black for visibility
+                    size: 12,
+                    align: 'middle'
                 }}
             }},
             physics: {{
@@ -492,11 +537,50 @@ def create_animated_causal_graph(causal_data, selected_node=None):
                 tooltipDelay: 50,
                 navigationButtons: true,
                 keyboard: true
-            }}
+            }},
+            autoResize: true,
+            height: '100%',
+            width: '100%',
+            configure: {{
+                enabled: false
+            }},
+            groups: {{}}
         }};
 
-        // Initialize the network
+        // Initialize the network first
         var network = new vis.Network(container, data, options);
+
+        // Function to ensure canvas has white background using CSS approach
+        function ensureWhiteBackground() {{
+            // Add a white background div behind the canvas
+            var existingBg = document.querySelector('#mynetwork .canvas-background');
+            if (!existingBg) {{
+                var bgDiv = document.createElement('div');
+                bgDiv.className = 'canvas-background';
+                bgDiv.style.position = 'absolute';
+                bgDiv.style.top = '0';
+                bgDiv.style.left = '0';
+                bgDiv.style.width = '100%';
+                bgDiv.style.height = '100%';
+                bgDiv.style.backgroundColor = '#FFFFFF';
+                bgDiv.style.zIndex = '-1';
+                bgDiv.style.pointerEvents = 'none';
+                container.appendChild(bgDiv);
+            }}
+
+            // Also ensure canvas CSS background is white
+            var canvases = document.querySelectorAll('#mynetwork canvas');
+            canvases.forEach(function(canvas) {{
+                canvas.style.backgroundColor = '#FFFFFF';
+            }});
+        }}
+
+        // Apply white background after a delay to ensure canvas is created
+        setTimeout(ensureWhiteBackground, 100);
+
+        // Also apply periodically to handle redraws
+        var backgroundInterval = setInterval(ensureWhiteBackground, 500);
+
         network.once('stabilizationIterationsDone', function() {{
             network.setOptions({{ physics: false }});
             network.fit({{
@@ -505,6 +589,8 @@ def create_animated_causal_graph(causal_data, selected_node=None):
                     easingFunction: 'easeInOutQuad'
                 }}
             }});
+            // Ensure background remains white after stabilization
+            setTimeout(ensureWhiteBackground, 100);
             console.log("Network stabilized and fitted with " + nodes.length + " nodes and " + edges.length + " edges");
         }});
         setTimeout(function() {{
@@ -513,7 +599,14 @@ def create_animated_causal_graph(causal_data, selected_node=None):
                 network.fit();
                 console.log("Physics timeout - forced stabilization");
             }}
+            // Ensure background remains white after timeout
+            setTimeout(ensureWhiteBackground, 100);
         }}, 5000);
+
+        // Stop the interval when the network is done to avoid unnecessary processing
+        network.on('resize', function() {{
+            ensureWhiteBackground();
+        }});
     </script>
 </body>
 </html>"""
@@ -819,6 +912,19 @@ def main():
             st.info(" **Pareto Frontier Insight**: Points in the top-left corner represent the optimal balance of high accuracy and low disparity. The Fairlearn Equalized Odds method typically achieves the best tradeoff.")
 
     with tab3:
+        # Add specific CSS to ensure causal graph area is white despite dark mode
+        st.markdown("""
+        <style>
+        div[data-testid="stContainer"] {
+            background-color: white !important;
+            color: black !important;
+        }
+        iframe {
+            background-color: white !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
         st.header("Interactive Causal Graph Explorer")
         st.markdown("**Drag nodes | Click for details | Zoom and pan | Filter edges**")
 
@@ -836,12 +942,116 @@ def main():
 
         selected_node = None if selected_node == 'None' else selected_node
 
+        use_simple = st.checkbox("Use simple white background graph (fallback)", value=False)
+
         graph_container = st.container()
         with graph_container:
             with st.spinner("Generating interactive causal graph..."):
-                graph_html = create_animated_causal_graph(results_data, selected_node)
-                st.markdown('<style>div[data-testid="stHtml"] {width: 100%;}</style>', unsafe_allow_html=True)
-                components.html(graph_html, height=1000, scrolling=False)
+                if use_simple:
+                    import math
+
+                    edges_data = results_data.get('causal_graph_validation', {}).get('edges', [])
+
+                    if not edges_data:
+                        st.warning("No causal graph data available to display.")
+                    else:
+                        nodes_set = set()
+                        for edge in edges_data:
+                            nodes_set.add(edge['source'])
+                            nodes_set.add(edge['target'])
+
+                        node_list = list(nodes_set)
+
+                        if not node_list:
+                            st.warning("No nodes found in the causal graph data.")
+                        else:
+                            # Calculate positions in a circular layout
+                            radius = 1
+                            node_pos = {}
+                            for idx, node in enumerate(node_list):
+                                angle = (2 * math.pi * idx) / len(node_list)
+                                node_pos[node] = (radius * math.cos(angle), radius * math.sin(angle))
+
+                            # Create edge trace
+                            edge_x = []
+                            edge_y = []
+                            for edge in edges_data:
+                                x0, y0 = node_pos[edge['source']]
+                                x1, y1 = node_pos[edge['target']]
+                                edge_x.extend([x0, x1, None])
+                                edge_y.extend([y0, y1, None])
+
+                            edge_trace = go.Scatter(x=edge_x, y=edge_y,
+                                                   mode='lines',
+                                                   line=dict(width=2, color='#888'),
+                                                   hoverinfo='none',
+                                                   showlegend=False)
+
+                            # Create node trace with colors based on node type
+                            node_colors = {
+                                'race_white': '#ff6b6b',  # red
+                                'high_cost': '#4ecdc4',  # teal
+                                'age': '#95e1d3',        # light green
+                                'sex': '#95e1d3',        # light green
+                                'has_esrd': '#f38181',   # pink-red
+                                'has_diabetes': '#f38181', # pink-red
+                                'has_chf': '#f38181',    # pink-red
+                                'has_copd': '#f38181',   # pink-red
+                                'chronic_count': '#aa96da' # purple
+                            }
+
+                            node_x = []
+                            node_y = []
+                            node_colors_list = []
+                            node_text = []
+
+                            for node in node_list:
+                                x, y = node_pos[node]
+                                node_x.append(x)
+                                node_y.append(y)
+
+                                # Determine node color
+                                color = node_colors.get(node, '#6c757d')  # gray as default
+                                node_colors_list.append(color)
+
+                                # Format node label
+                                label = node.replace('_', ' ').title()
+                                node_text.append(label)
+
+                            node_trace = go.Scatter(x=node_x, y=node_y,
+                                                   mode='markers+text',
+                                                   text=node_text,
+                                                   textposition="middle center",
+                                                   hoverinfo='text',
+                                                   hovertext=node_text,
+                                                   marker=dict(size=25,
+                                                             color=node_colors_list,
+                                                             line=dict(width=2, color='white')),
+                                                   showlegend=False)
+
+                            # Create the figure
+                            fig = go.Figure(data=[edge_trace, node_trace],
+                                          layout=go.Layout(
+                                              title=dict(text='Causal Graph Visualization', font=dict(size=16)),
+                                              showlegend=False,
+                                              hovermode='closest',
+                                              margin=dict(b=20,l=5,r=5,t=40),
+                                              annotations=[ dict(
+                                                  text="Causal relationships between variables",
+                                                  showarrow=False,
+                                                  xref="paper", yref="paper",
+                                                  x=0.005, y=-0.002 ) ],
+                                              xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                                              yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                                              plot_bgcolor='white',
+                                              paper_bgcolor='white',
+                                              height=800))
+
+                            st.plotly_chart(fig, use_container_width=True)
+                else:
+                    graph_html = create_animated_causal_graph(results_data, selected_node)
+                    st.markdown('<style>div[data-testid="stHtml"] {width: 100%;}</style>', unsafe_allow_html=True)
+                    components.html(graph_html, height=1000, scrolling=False)
 
         st.markdown("---")
 
