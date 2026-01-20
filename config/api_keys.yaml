@@ -1,0 +1,21 @@
+# API Keys Configuration
+# DO NOT commit this file
+
+# LLM Provider Selection
+# Options: "auto" (try DeepSeek first, fallback to Gemini)
+#          "deepseek" (force DeepSeek)
+#          "gemini" (force Gemini - required for demo)
+llm_provider: "auto"
+
+# DeepSeek API Configuration (for testing - unlimited requests)
+deepseek_api_key: "sk-8fdcc6097b9542ee8c450b366935d445"
+deepseek_model: "deepseek-chat"
+
+# Gemini API Configuration (for demo - free tier with rate limits)
+gemini_api_key: "AIzaSyAwaxC4QpiTDM4eksxixtQ5R-3OBhLsG5E"
+gemini_model: "gemini-2.0-flash"
+
+# Configuration
+enable_llm: true
+enable_cache: true
+log_level: "INFO"

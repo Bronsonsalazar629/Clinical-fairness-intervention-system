@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-01-07T22:02:45.214883",
+  "prompt": "\nGenerate ONLY executable Python code for: Fairlearn (Demographic Parity)\n\nFunction signature: def apply_intervention(df: pd.DataFrame, sensitive_attr: str, outcome: str)\n- Use fairlearn or aif360 lib...",
+  "response": "```python\nimport pandas as pd\nimport numpy as np\nfrom typing import Any\nfrom fairlearn.reductions import ExponentiatedGradient, DemographicParity\nfrom sklearn.linear_model import LogisticRegression\nfr...",
+  "model": "deepseek-chat",
+  "temperature": 0.2,
+  "cache_hit": false,
+  "latency_ms": 15759.875774383545,
+  "token_count": null
+}

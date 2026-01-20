@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-01-07T22:02:59.843547",
+  "prompt": "\nGenerate ONLY executable Python code for: Fairlearn (Equalized Odds)\n\nFunction signature: def apply_intervention(df: pd.DataFrame, sensitive_attr: str, outcome: str)\n- Use fairlearn or aif360 librari...",
+  "response": "```python\nimport pandas as pd\nimport numpy as np\nfrom typing import Any\nfrom sklearn.linear_model import LogisticRegression\nfrom fairlearn.reductions import EqualizedOdds\nfrom fairlearn.reductions imp...",
+  "model": "deepseek-chat",
+  "temperature": 0.2,
+  "cache_hit": false,
+  "latency_ms": 13083.723068237305,
+  "token_count": null
+}

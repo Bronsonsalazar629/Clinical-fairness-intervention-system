@@ -1,0 +1,385 @@
+{
+  "report_id": "clinical_fairness_20260107_220202",
+  "timestamp": "2026-01-07T22:03:23.387845",
+  "dataset_info": {
+    "n_samples": 116352,
+    "n_features": 9,
+    "features": [
+      "age",
+      "sex",
+      "has_esrd",
+      "has_diabetes",
+      "has_chf",
+      "has_copd",
+      "chronic_count",
+      "race_white",
+      "high_cost"
+    ],
+    "protected_attr": "race_white",
+    "outcome": "high_cost",
+    "outcome_prevalence": 0.2498882700770077,
+    "context": "medicare_high_cost"
+  },
+  "causal_graph_validation": {
+    "summary": {
+      "total_edges": 13,
+      "expert_edges": 8,
+      "validated_discovered_edges": 5,
+      "removed_due_to_cycles": 0
+    },
+    "edges": [
+      {
+        "source": "has_diabetes",
+        "target": "chronic_count",
+        "confidence": 0.95,
+        "edge_type": "expert",
+        "rationale": "Diabetes contributes to chronic disease count",
+        "literature_support": null
+      },
+      {
+        "source": "has_chf",
+        "target": "chronic_count",
+        "confidence": 0.95,
+        "edge_type": "expert",
+        "rationale": "CHF contributes to chronic disease count",
+        "literature_support": null
+      },
+      {
+        "source": "has_copd",
+        "target": "chronic_count",
+        "confidence": 0.95,
+        "edge_type": "expert",
+        "rationale": "COPD contributes to chronic disease count",
+        "literature_support": null
+      },
+      {
+        "source": "has_esrd",
+        "target": "high_cost",
+        "confidence": 0.95,
+        "edge_type": "expert",
+        "rationale": "ESRD significantly increases costs",
+        "literature_support": null
+      },
+      {
+        "source": "has_esrd",
+        "target": "high_cost",
+        "confidence": 0.95,
+        "edge_type": "validated",
+        "rationale": "End-stage renal disease is among the highest-cost conditions due to dialysis, transplantation, and management of severe associated cardiovascular and metabolic complications.",
+        "literature_support": "USRDS Annual Data Report 2023"
+      },
+      {
+        "source": "age",
+        "target": "has_diabetes",
+        "confidence": 0.9,
+        "edge_type": "expert",
+        "rationale": "Age increases diabetes risk",
+        "literature_support": null
+      },
+      {
+        "source": "chronic_count",
+        "target": "high_cost",
+        "confidence": 0.9,
+        "edge_type": "expert",
+        "rationale": "Chronic conditions increase healthcare costs",
+        "literature_support": null
+      },
+      {
+        "source": "chronic_count",
+        "target": "high_cost",
+        "confidence": 0.9,
+        "edge_type": "validated",
+        "rationale": "A higher burden of chronic diseases directly increases healthcare utilization, medication needs, and complication risks, leading to significantly elevated medical costs.",
+        "literature_support": "Anderson & Knickman 2001; Health Affairs 2020"
+      },
+      {
+        "source": "has_chf",
+        "target": "high_cost",
+        "confidence": 0.88,
+        "edge_type": "validated",
+        "rationale": "Congestive heart failure is a high-cost condition due to frequent hospitalizations, expensive medications, device therapies, and management of acute decompensations.",
+        "literature_support": "Heidenreich et al., Circulation 2022"
+      },
+      {
+        "source": "age",
+        "target": "has_chf",
+        "confidence": 0.85,
+        "edge_type": "expert",
+        "rationale": "Age increases CHF risk",
+        "literature_support": null
+      },
+      {
+        "source": "has_diabetes",
+        "target": "high_cost",
+        "confidence": 0.85,
+        "edge_type": "validated",
+        "rationale": "Diabetes increases costs through complications (renal, cardiac, neuropathic), ongoing medication/device needs, and management of associated comorbidities.",
+        "literature_support": "American Diabetes Association, Diabetes Care 2023"
+      },
+      {
+        "source": "age",
+        "target": "has_copd",
+        "confidence": 0.8,
+        "edge_type": "expert",
+        "rationale": "Age increases COPD risk",
+        "literature_support": null
+      },
+      {
+        "source": "age",
+        "target": "chronic_count",
+        "confidence": 0.425,
+        "edge_type": "validated",
+        "rationale": "Advanced age increases the cumulative risk and incidence of multiple chronic conditions due to cellular senescence, accumulated exposures, and declining physiological reserve.",
+        "literature_support": "CDC 2022; Geriatric Medicine Principles"
+      }
+    ],
+    "context": {
+      "domain": "medicare_high_cost",
+      "protected_attr": "race_white",
+      "protected_attr_label": "race (White vs Non-White)",
+      "outcome": "high_cost",
+      "outcome_label": "high-cost patient (top 25% medical costs)",
+      "data_summary": {
+        "n_samples": 116352,
+        "n_features": 9,
+        "features": [
+          "age",
+          "sex",
+          "has_esrd",
+          "has_diabetes",
+          "has_chf",
+          "has_copd",
+          "chronic_count",
+          "race_white",
+          "high_cost"
+        ],
+        "outcome_prevalence": 0.2498882700770077
+      },
+      "expert_knowledge": [
+        "Age increases chronic disease risk (CDC 2022)",
+        "Chronic diseases (diabetes, CHF, COPD) increase healthcare costs",
+        "Race correlates with socioeconomic factors affecting health access",
+        "ESRD (End-Stage Renal Disease) is high-cost condition"
+      ],
+      "safety_threshold": "FNR disparity < 5% for clinical safety",
+      "protected_attr_distribution": {
+        "1": 96349,
+        "0": 20003
+      }
+    },
+    "validation_timestamp": "2026-01-07T22:02:29.448838"
+  },
+  "bias_harm_narratives": {
+    "Unmitigated Baseline": {
+      "fnr_disparity": 0.01921420152167368,
+      "dp_difference": 0.03174804007620112,
+      "protected_attr": "race_white",
+      "outcome": "high_cost",
+      "context": "medicare_high_cost",
+      "narrative": "A False Negative Rate (FNR) disparity of 1.9% means that Non-White patients\nare 1.1x more likely to be incorrectly classified as low-cost,\nleading to inadequate care management and preventable hospitalizations. This\nviolates the principle of justice (fair resource allocation) by systematically underestimating care\nneeds for vulnerable populations.",
+      "affected_patients_estimate": 58176,
+      "preventable_outcomes_estimate": 279
+    },
+    "Fairlearn (Demographic Parity)": {
+      "fnr_disparity": 0.04259928567560381,
+      "dp_difference": 0.021297956314295326,
+      "protected_attr": "race_white",
+      "outcome": "high_cost",
+      "context": "medicare_high_cost",
+      "narrative": "A False Negative Rate (FNR) disparity of 4.3% means that Non-White patients\nare 1.2x more likely to be incorrectly classified as low-cost,\nleading to inadequate care management and preventable hospitalizations. This\nviolates the principle of justice (fair resource allocation) by systematically underestimating care\nneeds for vulnerable populations.",
+      "affected_patients_estimate": 58176,
+      "preventable_outcomes_estimate": 619
+    },
+    "Fairlearn (Equalized Odds)": {
+      "fnr_disparity": 0.01314974508879985,
+      "dp_difference": 0.03441812762611396,
+      "protected_attr": "race_white",
+      "outcome": "high_cost",
+      "context": "medicare_high_cost",
+      "narrative": "A False Negative Rate (FNR) disparity of 1.3% means that Non-White patients\nare 1.1x more likely to be incorrectly classified as low-cost,\nleading to inadequate care management and preventable hospitalizations. This\nviolates the principle of justice (fair resource allocation) by systematically underestimating care\nneeds for vulnerable populations.",
+      "affected_patients_estimate": 58176,
+      "preventable_outcomes_estimate": 191
+    },
+    "AIF360 Reweighing": {
+      "fnr_disparity": 0.01866821415144956,
+      "dp_difference": 0.030285717123921637,
+      "protected_attr": "race_white",
+      "outcome": "high_cost",
+      "context": "medicare_high_cost",
+      "narrative": "A False Negative Rate (FNR) disparity of 1.9% means that Non-White patients\nare 1.1x more likely to be incorrectly classified as low-cost,\nleading to inadequate care management and preventable hospitalizations. This\nviolates the principle of justice (fair resource allocation) by systematically underestimating care\nneeds for vulnerable populations.",
+      "affected_patients_estimate": 58176,
+      "preventable_outcomes_estimate": 271
+    }
+  },
+  "intervention_rationales": {
+    "Unmitigated Baseline": {
+      "intervention_name": "Unmitigated Baseline",
+      "safety_narrative": "No fairness intervention applied; preserves existing algorithmic biases from training data",
+      "implementation_narrative": "No implementation required - current state Evidence base: N/A (peer-reviewed validation).",
+      "interpretability_narrative": "Baseline interpretability (varies by model type)",
+      "safety_assessment": {
+        "clinical_safety_score": 0.6,
+        "implementation_complexity": "low",
+        "clinician_trust_impact": "neutral",
+        "deployment_recommendation": "not_recommended",
+        "evidence_base": "N/A"
+      },
+      "limitations": [
+        "Perpetuates existing healthcare disparities",
+        "May violate ethical principles of justice and equity",
+        "Does not address known biases in training data"
+      ],
+      "monitoring_requirements": [
+        "Baseline metrics for comparison with interventions",
+        "Track disparity trends over time",
+        "Document harm from unaddressed bias"
+      ]
+    },
+    "Fairlearn (Demographic Parity)": {
+      "intervention_name": "Fairlearn (Demographic Parity)",
+      "safety_narrative": "Equalizes positive prediction rates across demographic groups, ensuring equal access to clinical interventions Note: May reduce overall accuracy by 0.1%, but this tradeoff is ethically justified to achieve clinical fairness.",
+      "implementation_narrative": "Medium complexity; requires modification to training pipeline; compatible with standard ML frameworks Evidence base: moderate (peer-reviewed validation).",
+      "interpretability_narrative": "Interpretable - prediction rate parity is straightforward concept for clinical staff",
+      "safety_assessment": {
+        "clinical_safety_score": 0.85,
+        "implementation_complexity": "medium",
+        "clinician_trust_impact": "neutral",
+        "deployment_recommendation": "conditional",
+        "evidence_base": "moderate"
+      },
+      "limitations": [
+        "May not address outcome disparities (only prediction rate equity)",
+        "Can reduce precision in higher-prevalence demographic groups",
+        "Assumes equal base rates across groups (often violated in practice)"
+      ],
+      "monitoring_requirements": [
+        "Track prediction rate parity across protected attributes",
+        "Monitor actual clinical outcomes by demographic subgroup",
+        "Review false discovery rates and positive predictive values"
+      ]
+    },
+    "Fairlearn (Equalized Odds)": {
+      "intervention_name": "Fairlearn (Equalized Odds)",
+      "safety_narrative": "Constrains model to equalize true positive and false positive rates across demographic groups while maintaining clinical accuracy thresholds Note: May reduce overall accuracy by 1.3%, but this tradeoff is ethically justified to achieve clinical fairness.",
+      "implementation_narrative": "Requires model retraining with fairness constraints; compatible with scikit-learn pipelines; moderate integration effort Evidence base: strong (peer-reviewed validation).",
+      "interpretability_narrative": "Moderately interpretable - fairness constraints are explicit, but multiplier adjustments may not be intuitive to all clinicians",
+      "safety_assessment": {
+        "clinical_safety_score": 0.9,
+        "implementation_complexity": "medium",
+        "clinician_trust_impact": "positive",
+        "deployment_recommendation": "recommended",
+        "evidence_base": "strong"
+      },
+      "limitations": [
+        "May reduce overall accuracy by 2-5% to achieve fairness",
+        "Requires careful threshold calibration for clinical context",
+        "Performance varies with class imbalance severity"
+      ],
+      "monitoring_requirements": [
+        "Monthly FNR/FPR disparity validation across demographics",
+        "Quarterly model recalibration with updated patient data",
+        "Continuous accuracy monitoring with alert thresholds"
+      ]
+    },
+    "AIF360 Reweighing": {
+      "intervention_name": "AIF360 Reweighing",
+      "safety_narrative": "IBM AIF360 implementation of sample reweighing with comprehensive bias metrics; preserves model interpretability",
+      "implementation_narrative": "Low-medium complexity; requires AIF360 library installation; well-documented integration path Evidence base: strong (peer-reviewed validation).",
+      "interpretability_narrative": "Highly interpretable - provides detailed bias metrics dashboard; weights are transparent and auditable",
+      "safety_assessment": {
+        "clinical_safety_score": 0.92,
+        "implementation_complexity": "low",
+        "clinician_trust_impact": "positive",
+        "deployment_recommendation": "recommended",
+        "evidence_base": "strong"
+      },
+      "limitations": [
+        "Requires additional AIF360 dependency in deployment environment",
+        "Limited to preprocessing stage (cannot correct in-process biases)",
+        "May not handle intersectional fairness (e.g., race \u00d7 sex)"
+      ],
+      "monitoring_requirements": [
+        "Monthly comprehensive fairness metrics dashboard",
+        "Disparate impact ratio tracking (0.8-1.2 acceptable range)",
+        "Statistical parity difference and equal opportunity monitoring"
+      ]
+    }
+  },
+  "generated_code": {
+    "Fairlearn (Demographic Parity)": {
+      "intervention_name": "Fairlearn (Demographic Parity)",
+      "code": "import pandas as pd\nimport numpy as np\nfrom typing import Any\nfrom fairlearn.reductions import ExponentiatedGradient, DemographicParity\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.preprocessing import StandardScaler, LabelEncoder\nfrom sklearn.pipeline import Pipeline\n\ndef apply_intervention(df: pd.DataFrame, sensitive_attr: str, outcome: str) -> Any:\n    \"\"\"\n    Apply Demographic Parity fairness intervention using Fairlearn.\n    \n    Parameters\n    ----------\n    df : pd.DataFrame\n        Input dataframe containing features, sensitive attribute, and outcome\n    sensitive_attr : str\n        Name of the sensitive attribute column\n    outcome : str\n        Name of the binary outcome column\n        \n    Returns\n    -------\n    Any\n        Trained fair model object\n    \"\"\"\n    \n    # Prepare data\n    X = df.drop(columns=[sensitive_attr, outcome]).copy()\n    y = df[outcome].copy()\n    sensitive_features = df[sensitive_attr].copy()\n    \n    # Encode categorical sensitive features if needed\n    if sensitive_features.dtype == 'object' or sensitive_features.dtype.name == 'category':\n        le = LabelEncoder()\n        sensitive_features = le.fit_transform(sensitive_features)\n    \n    # Create base estimator\n    base_estimator = Pipeline([\n        ('scaler', StandardScaler()),\n        ('classifier', LogisticRegression(random_state=42, max_iter=1000))\n    ])\n    \n    # Apply Demographic Parity constraint\n    constraint = DemographicParity()\n    \n    # Use ExponentiatedGradient reduction\n    mitigator = ExponentiatedGradient(\n        estimator=base_estimator,\n        constraints=constraint,\n        eps=0.01,\n        max_iter=50,\n        eta0=2.0\n    )\n    \n    # Train the fair model\n    mitigator.fit(X, y, sensitive_features=sensitive_features)\n    \n    return mitigator",
+      "validation_report": {
+        "syntax_valid": true,
+        "security_safe": true,
+        "implements_intervention": true,
+        "passes_unit_tests": false,
+        "fallback_used": false,
+        "errors": []
+      },
+      "usage_example": "\n# Usage: Fairlearn (Demographic Parity)\nimport pandas as pd\n\ndf = pd.read_csv('data.csv')\nmodel = apply_intervention(df, 'race_white', 'high_cost')\npredictions = model.predict(df.drop(columns=['high_cost']))\n",
+      "dependencies": [
+        "fairlearn",
+        "numpy",
+        "pandas",
+        "sklearn",
+        "typing"
+      ]
+    },
+    "Fairlearn (Equalized Odds)": {
+      "intervention_name": "Fairlearn (Equalized Odds)",
+      "code": "import pandas as pd\nimport numpy as np\nfrom typing import Any\nfrom sklearn.linear_model import LogisticRegression\nfrom fairlearn.reductions import EqualizedOdds\nfrom fairlearn.reductions import GridSearch\n\ndef apply_intervention(df: pd.DataFrame, sensitive_attr: str, outcome: str) -> Any:\n    \"\"\"\n    Apply Equalized Odds fairness intervention using Fairlearn.\n    \n    Parameters\n    ----------\n    df : pd.DataFrame\n        Input dataframe containing features, sensitive attribute, and outcome\n    sensitive_attr : str\n        Name of the sensitive attribute column (e.g., 'gender', 'race')\n    outcome : str\n        Name of the binary outcome/target column\n        \n    Returns\n    -------\n    Any\n        Trained model object implementing Equalized Odds fairness constraint\n    \"\"\"\n    # Prepare features and labels\n    X = df.drop(columns=[sensitive_attr, outcome]).values\n    y = df[outcome].values\n    sensitive_features = df[sensitive_attr].values\n    \n    # Initialize base estimator\n    base_estimator = LogisticRegression(solver='liblinear', random_state=42)\n    \n    # Initialize Equalized Odds constraint\n    constraint = EqualizedOdds()\n    \n    # Perform grid search for optimal mitigation\n    mitigator = GridSearch(\n        estimator=base_estimator,\n        constraints=constraint,\n        grid_size=50,\n        grid_limit=2.0\n    )\n    \n    # Fit the mitigator\n    mitigator.fit(X, y, sensitive_features=sensitive_features)\n    \n    return mitigator",
+      "validation_report": {
+        "syntax_valid": true,
+        "security_safe": true,
+        "implements_intervention": true,
+        "passes_unit_tests": true,
+        "fallback_used": false,
+        "errors": []
+      },
+      "usage_example": "\n# Usage: Fairlearn (Equalized Odds)\nimport pandas as pd\n\ndf = pd.read_csv('data.csv')\nmodel = apply_intervention(df, 'race_white', 'high_cost')\npredictions = model.predict(df.drop(columns=['high_cost']))\n",
+      "dependencies": [
+        "fairlearn",
+        "numpy",
+        "pandas",
+        "sklearn",
+        "typing"
+      ]
+    },
+    "AIF360 Reweighing": {
+      "intervention_name": "AIF360 Reweighing",
+      "code": "import pandas as pd\nimport numpy as np\nfrom typing import Any\nfrom aif360.algorithms.preprocessing import Reweighing\nfrom aif360.datasets import StandardDataset\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.preprocessing import StandardScaler\n\ndef apply_intervention(df: pd.DataFrame, sensitive_attr: str, outcome: str) -> Any:\n    \"\"\"\n    Apply AIF360 Reweighing preprocessing intervention to mitigate bias.\n    \n    Args:\n        df: Input DataFrame containing features, sensitive attribute, and outcome\n        sensitive_attr: Name of the sensitive attribute column\n        outcome: Name of the binary outcome/target column (0/1)\n    \n    Returns:\n        Trained logistic regression model with reweighted samples\n    \"\"\"\n    # Create a copy to avoid modifying original dataframe\n    data = df.copy()\n    \n    # Prepare features and labels\n    feature_cols = [col for col in data.columns \n                   if col not in [sensitive_attr, outcome]]\n    \n    X = data[feature_cols].values\n    y = data[outcome].values\n    sensitive = data[sensitive_attr].values\n    \n    # Create StandardDataset for AIF360\n    dataset = StandardDataset(\n        df=data,\n        label_name=outcome,\n        favorable_classes=[1],\n        protected_attribute_names=[sensitive_attr],\n        privileged_classes=[[1]]  # Assuming 1 is privileged group\n    )\n    \n    # Apply Reweighing\n    RW = Reweighing(\n        unprivileged_groups=[{sensitive_attr: 0}],\n        privileged_groups=[{sensitive_attr: 1}]\n    )\n    dataset_transformed = RW.fit_transform(dataset)\n    \n    # Get transformed data with sample weights\n    X_transformed = dataset_transformed.features\n    y_transformed = dataset_transformed.labels.ravel()\n    sample_weights = dataset_transformed.instance_weights\n    \n    # Scale features\n    scaler = StandardScaler()\n    X_scaled = scaler.fit_transform(X_transformed)\n    \n    # Train model with reweighted samples\n    model = LogisticRegression(\n        random_state=42,\n        max_iter=1000,\n        class_weight='balanced'\n    )\n    model.fit(X_scaled, y_transformed, sample_weight=sample_weights)\n    \n    return model",
+      "validation_report": {
+        "syntax_valid": true,
+        "security_safe": true,
+        "implements_intervention": true,
+        "passes_unit_tests": true,
+        "fallback_used": false,
+        "errors": []
+      },
+      "usage_example": "\n# Usage: AIF360 Reweighing\nimport pandas as pd\n\ndf = pd.read_csv('data.csv')\nmodel = apply_intervention(df, 'race_white', 'high_cost')\npredictions = model.predict(df.drop(columns=['high_cost']))\n",
+      "dependencies": [
+        "aif360",
+        "numpy",
+        "pandas",
+        "sklearn",
+        "typing"
+      ]
+    }
+  },
+  "executive_summary": {
+    "dataset_summary": "116352 patients, 9 features",
+    "causal_analysis": "13 total causal edges (5 LLM-validated)",
+    "fairness_interventions_evaluated": 4,
+    "recommended_intervention": "Fairlearn (Equalized Odds)",
+    "best_fnr_disparity": "1.3%",
+    "implementation_code_generated": 3,
+    "clinical_safety_status": "SAFE"
+  },
+  "deployment_recommendations": [
+    "PRIORITY: Address baseline bias - A False Negative Rate (FNR) disparity of 1.9% means that Non-White patients\nare 1.1x more likely to be incorrectly classified as low-cost,\nleading to ...",
+    "CONDITIONAL: Fairlearn (Demographic Parity) requires monitoring - May not address outcome disparities (only prediction rate equity)",
+    "RECOMMENDED: Deploy Fairlearn (Equalized Odds) - Constrains model to equalize true positive and false positive rates across demographic groups while ...",
+    "RECOMMENDED: Deploy AIF360 Reweighing - IBM AIF360 implementation of sample reweighing with comprehensive bias metrics; preserves model inte..."
+  ]
+}

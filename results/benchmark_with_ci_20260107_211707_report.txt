@@ -1,0 +1,98 @@
+================================================================================
+FAIRNESS BENCHMARK WITH CONFIDENCE INTERVALS
+================================================================================
+
+Generated: 2026-01-07 21:17:07
+
+SUMMARY TABLE
+--------------------------------------------------------------------------------
+
+| Method | Fnr Disparity | Dp Difference | Accuracy | Equalized Odds |
+|---|---|---|---|---|
+| Unmitigated Baseline | 1.9% [95% CI: 0.1%-4.4%] | 3.2% [95% CI: 2.1%-4.2%] | 84.6% [95% CI: 84.3%-85.0%] | 1.7% [95% CI: 0.7%-3.1%] |
+| Fairlearn (Demographic Parity) | 4.3% [95% CI: 1.4%-7.0%] | 2.1% [95% CI: 1.0%-3.2%] | 84.6% [95% CI: 84.2%-85.0%] | 2.6% [95% CI: 1.1%-4.1%] |
+| Fairlearn (Equalized Odds) | 1.3% [95% CI: 0.1%-3.5%] | 3.4% [95% CI: 2.4%-4.4%] | 83.4% [95% CI: 83.0%-83.7%] | 1.4% [95% CI: 0.7%-2.6%] |
+| AIF360 Reweighing | 1.9% [95% CI: 0.1%-4.4%] | 3.0% [95% CI: 1.9%-4.1%] | 84.7% [95% CI: 84.3%-85.0%] | 1.6% [95% CI: 0.6%-2.9%] |
+
+
+DETAILED RESULTS
+--------------------------------------------------------------------------------
+
+
+Unmitigated Baseline:
+  FNR Disparity: 1.9% [95% CI: 0.1%-4.4%]
+  DP Difference: 3.2% [95% CI: 2.1%-4.2%]
+  Accuracy: 84.6% [95% CI: 84.3%-85.0%]
+  Equalized Odds: 1.7% [95% CI: 0.7%-3.1%]
+
+Fairlearn (Demographic Parity):
+  FNR Disparity: 4.3% [95% CI: 1.4%-7.0%]
+  DP Difference: 2.1% [95% CI: 1.0%-3.2%]
+  Accuracy: 84.6% [95% CI: 84.2%-85.0%]
+  Equalized Odds: 2.6% [95% CI: 1.1%-4.1%]
+
+Fairlearn (Equalized Odds):
+  FNR Disparity: 1.3% [95% CI: 0.1%-3.5%]
+  DP Difference: 3.4% [95% CI: 2.4%-4.4%]
+  Accuracy: 83.4% [95% CI: 83.0%-83.7%]
+  Equalized Odds: 1.4% [95% CI: 0.7%-2.6%]
+
+AIF360 Reweighing:
+  FNR Disparity: 1.9% [95% CI: 0.1%-4.4%]
+  DP Difference: 3.0% [95% CI: 1.9%-4.1%]
+  Accuracy: 84.7% [95% CI: 84.3%-85.0%]
+  Equalized Odds: 1.6% [95% CI: 0.6%-2.9%]
+
+================================================================================
+STATISTICAL SIGNIFICANCE TESTS
+================================================================================
+
+
+Unmitigated Baseline_vs_Fairlearn (Demographic Parity):
+  Statistically Significant: NO
+  Difference in FNR Disparity: -2.339%
+  Unmitigated Baseline CI: 0.1%-4.4%
+  Fairlearn (Demographic Parity) CI: 1.4%-7.0%
+
+Unmitigated Baseline_vs_Fairlearn (Equalized Odds):
+  Statistically Significant: NO
+  Difference in FNR Disparity: 0.606%
+  Unmitigated Baseline CI: 0.1%-4.4%
+  Fairlearn (Equalized Odds) CI: 0.1%-3.5%
+
+Unmitigated Baseline_vs_AIF360 Reweighing:
+  Statistically Significant: NO
+  Difference in FNR Disparity: 0.055%
+  Unmitigated Baseline CI: 0.1%-4.4%
+  AIF360 Reweighing CI: 0.1%-4.4%
+
+Fairlearn (Demographic Parity)_vs_Fairlearn (Equalized Odds):
+  Statistically Significant: NO
+  Difference in FNR Disparity: 2.945%
+  Fairlearn (Demographic Parity) CI: 1.4%-7.0%
+  Fairlearn (Equalized Odds) CI: 0.1%-3.5%
+
+Fairlearn (Demographic Parity)_vs_AIF360 Reweighing:
+  Statistically Significant: NO
+  Difference in FNR Disparity: 2.393%
+  Fairlearn (Demographic Parity) CI: 1.4%-7.0%
+  AIF360 Reweighing CI: 0.1%-4.4%
+
+Fairlearn (Equalized Odds)_vs_AIF360 Reweighing:
+  Statistically Significant: NO
+  Difference in FNR Disparity: -0.552%
+  Fairlearn (Equalized Odds) CI: 0.1%-3.5%
+  AIF360 Reweighing CI: 0.1%-4.4%
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+1. Best Performing Method: Fairlearn (Equalized Odds)
+   FNR Disparity: 1.3% [95% CI: 0.1%-3.5%]
+
+2. Statistical Significance: 0/6 pairwise comparisons show
+   non-overlapping confidence intervals (statistically significant difference)
+
+3. Clinical Safety: All methods with FNR disparity < 5% are considered clinically safe.
+   Safe methods (upper CI < 5%): Unmitigated Baseline, Fairlearn (Equalized Odds), AIF360 Reweighing

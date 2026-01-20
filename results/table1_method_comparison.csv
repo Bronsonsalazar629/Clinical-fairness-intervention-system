@@ -1,0 +1,5 @@
+Method,Accuracy (mean),Accuracy (std),FNR Disparity (mean),FNR Disparity (std),Clinical Safety
+Fairlearn (Equalized Odds),0.7895,0.0308,0.0218,0.0084,SAFE
+Unmitigated Baseline,0.8468,0.0020,0.0260,0.0090,SAFE
+AIF360 Reweighing,0.8468,0.0020,0.0275,0.0076,SAFE
+Fairlearn (Demographic Parity),0.8430,0.0026,0.0468,0.0101,SAFE

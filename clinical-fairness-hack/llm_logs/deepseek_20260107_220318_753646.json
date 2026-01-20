@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-01-07T22:03:18.753609",
+  "prompt": "\nGenerate ONLY executable Python code for: AIF360 Reweighing\n\nFunction signature: def apply_intervention(df: pd.DataFrame, sensitive_attr: str, outcome: str)\n- Use fairlearn or aif360 libraries\n- Incl...",
+  "response": "```python\nimport pandas as pd\nimport numpy as np\nfrom typing import Any\nfrom aif360.algorithms.preprocessing import Reweighing\nfrom aif360.datasets import StandardDataset\nfrom sklearn.linear_model imp...",
+  "model": "deepseek-chat",
+  "temperature": 0.2,
+  "cache_hit": false,
+  "latency_ms": 18633.325338363647,
+  "token_count": null
+}
