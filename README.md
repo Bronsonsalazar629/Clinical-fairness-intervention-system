@@ -2,6 +2,8 @@
 
 Detect and remediate algorithmic bias in clinical ML models using causal inference and automated code generation.
 
+Link to Deployed Dashboard: https://clinical-fairness-intervention-system-b4gwjstowpbeawdyrckatn.streamlit.app/
+
 ---
 
 ## Overview
