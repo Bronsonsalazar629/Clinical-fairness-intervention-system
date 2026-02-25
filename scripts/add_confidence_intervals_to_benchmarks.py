@@ -23,8 +23,10 @@ from src.confidence_intervals import (
     compute_fairness_with_confidence_intervals,
     compare_methods_with_ci,
     generate_ci_summary_table,
-    format_metric_with_ci
+    format_metric_with_ci,
+    permutation_test_methods
 )
+from src.pc_algorithm_clinical import PCAlgorithmClinical
 
 logging.basicConfig(
     level=logging.INFO,
@@ -76,6 +78,99 @@ def load_medicare_data():
     logger.info(f"  White patients: {df_clean['race_white'].mean():.1%}")
 
     return df_clean
+
+def train_causal_discovery_method(X_train, y_train, X_test, protected_train, feature_cols):
+    """
+    Train a causally-fair model using PC algorithm causal discovery.
+
+    Discovers causal structure, identifies features that are causal descendants
+    of the protected attribute (race_white), and trains a model excluding those
+    features to avoid proxy discrimination.
+
+    Returns:
+        y_pred: Predictions on test set using only non-descendant features
+        causal_info: Dict with kept/excluded features, bias pathways, edges
+    """
+    import networkx as nx
+    from sklearn.linear_model import LogisticRegression
+
+    # Build DataFrame for causal discovery
+    train_df = pd.DataFrame(X_train, columns=feature_cols)
+    train_df['race_white'] = protected_train
+    train_df['high_cost'] = y_train
+
+    # Define temporal ordering for clinical domain knowledge
+    temporal_order = {
+        'race_white': 0, 'age': 0, 'sex': 0,
+        'has_esrd': 1, 'has_diabetes': 1, 'has_chf': 1, 'has_copd': 1,
+        'chronic_count': 2,
+        'high_cost': 3
+    }
+
+    clinical_variables = {
+        'conditions': ['has_esrd', 'has_diabetes', 'has_chf', 'has_copd', 'chronic_count']
+    }
+
+    logger.info("Running PC Algorithm for causal discovery...")
+    pc_algo = PCAlgorithmClinical(
+        data=train_df,
+        protected_attr='race_white',
+        outcome='high_cost',
+        temporal_order=temporal_order,
+        clinical_variables=clinical_variables,
+        alpha=0.001,
+        n_bootstrap=50
+    )
+    result = pc_algo.run()
+
+    # Find features causally downstream of race_white
+    causal_graph = result['causal_graph']
+    if 'race_white' in causal_graph:
+        descendants = nx.descendants(causal_graph, 'race_white')
+        # If all features would be excluded (dense graph), fall back to direct children only
+        excluded_features = descendants & set(feature_cols)
+        if len(excluded_features) >= len(feature_cols):
+            logger.warning("  All features are descendants of race_white (dense graph). "
+                           "Falling back to direct children only.")
+            direct_children = set(causal_graph.successors('race_white'))
+            excluded_features = direct_children & set(feature_cols)
+    else:
+        descendants = set()
+        excluded_features = set()
+
+    kept_features = [f for f in feature_cols if f not in excluded_features]
+    kept_indices = [feature_cols.index(f) for f in kept_features]
+
+    logger.info(f"  Causal discovery: {len(kept_features)} features kept, {len(excluded_features)} excluded")
+    logger.info(f"  Kept: {kept_features}")
+    logger.info(f"  Excluded (descendants of race): {sorted(excluded_features)}")
+
+    # Train model on non-descendant features only
+    model = LogisticRegression(random_state=42, max_iter=1000)
+    model.fit(X_train[:, kept_indices], y_train)
+    y_pred = model.predict(X_test[:, kept_indices])
+
+    # Build causal info dict
+    causal_info = {
+        'kept_features': kept_features,
+        'excluded_features': sorted(excluded_features),
+        'n_edges': len(result['directed_edges']),
+        'directed_edges': [list(e) for e in result['directed_edges']],
+        'bias_pathways': [
+            {
+                'path': p.path,
+                'pathway_type': p.pathway_type,
+                'intervention_point': p.intervention_point,
+                'rationale': p.rationale,
+                'confidence': p.confidence,
+                'sensitivity_robustness': p.sensitivity_robustness
+            }
+            for p in result['bias_pathways']
+        ]
+    }
+
+    return y_pred, causal_info
+
 
 def train_and_evaluate_methods_with_ci(df, n_bootstrap=1000):
     """
@@ -167,6 +262,19 @@ def train_and_evaluate_methods_with_ci(df, n_bootstrap=1000):
         return_raw_samples=True
     )
 
+    # 5th method: Causal Discovery (PC Algorithm)
+    logger.info("Training Causal Discovery (PC Algorithm)...")
+    y_pred_causal, causal_info = train_causal_discovery_method(
+        X_train, y_train, X_test, protected_train, feature_cols
+    )
+
+    logger.info("Computing CIs for Causal Discovery (PC Algorithm)...")
+    methods_results['Causal Discovery (PC Algorithm)'] = compute_fairness_with_confidence_intervals(
+        y_test, y_pred_causal, protected_test, n_bootstrap=n_bootstrap,
+        return_raw_samples=True
+    )
+    methods_results['Causal Discovery (PC Algorithm)']['causal_info'] = causal_info
+
     return methods_results
 
 def save_results_with_ci(methods_results):
@@ -176,8 +284,19 @@ def save_results_with_ci(methods_results):
 
     json_path = results_dir / f"benchmark_with_ci_{timestamp}.json"
 
+    # Strip non-serializable fields (bootstrap_samples arrays, causal_info)
+    serializable_results = {}
+    for method_name, results in methods_results.items():
+        serializable_results[method_name] = {
+            k: v for k, v in results.items()
+            if k not in ('bootstrap_samples', 'causal_info')
+        }
+        # Include causal_info if present (already serializable)
+        if 'causal_info' in results:
+            serializable_results[method_name]['causal_info'] = results['causal_info']
+
     with open(json_path, 'w') as f:
-        json.dump(methods_results, f, indent=2)
+        json.dump(serializable_results, f, indent=2)
 
     logger.info(f"Saved JSON results: {json_path}")
 
@@ -252,6 +371,52 @@ def generate_report(methods_results):
         if comparison_data['significant']:
             winner = comparison_name.split('_vs_')[0] if comparison_data['difference'] > 0 else comparison_name.split('_vs_')[1]
             report.append(f"  Winner: {winner} (lower FNR disparity)")
+
+    # Permutation tests
+    report.append("\n" + "="*80)
+    report.append("PERMUTATION TESTS (FNR DISPARITY)")
+    report.append("="*80)
+    report.append("")
+
+    try:
+        perm_results = permutation_test_methods(
+            methods_results, metric_name='fnr_disparity',
+            n_permutations=10000, correction='bonferroni'
+        )
+
+        for comparison_name, perm_data in perm_results.items():
+            sig_marker = " ***" if perm_data['significant'] else ""
+            report.append(f"\n{comparison_name}:")
+            report.append(f"  Raw p-value: {perm_data['p_value']:.6f}")
+            report.append(f"  Corrected p-value (Bonferroni): {perm_data['p_value_corrected']:.6f}")
+            report.append(f"  Effect size (Cohen's d): {perm_data['effect_size']:.3f}")
+            report.append(f"  Significant: {'YES' if perm_data['significant'] else 'NO'}{sig_marker}")
+    except Exception as e:
+        report.append(f"  Permutation tests skipped: {e}")
+
+    # Causal discovery details
+    causal_method_key = 'Causal Discovery (PC Algorithm)'
+    if causal_method_key in methods_results and 'causal_info' in methods_results[causal_method_key]:
+        causal_info = methods_results[causal_method_key]['causal_info']
+
+        report.append("\n" + "="*80)
+        report.append("CAUSAL DISCOVERY DETAILS")
+        report.append("="*80)
+        report.append("")
+
+        report.append(f"Features kept ({len(causal_info['kept_features'])}): {', '.join(causal_info['kept_features'])}")
+        report.append(f"Features excluded as descendants of race ({len(causal_info['excluded_features'])}): "
+                      f"{', '.join(causal_info['excluded_features']) if causal_info['excluded_features'] else 'None'}")
+        report.append(f"Total directed edges discovered: {causal_info['n_edges']}")
+        report.append("")
+
+        pathways = causal_info['bias_pathways']
+        report.append(f"Bias Pathways ({len(pathways)} detected):")
+        for i, pathway in enumerate(pathways, 1):
+            report.append(f"  {i}. {' -> '.join(pathway['path'])}")
+            report.append(f"     Type: {pathway['pathway_type']}")
+            report.append(f"     Intervention point: {pathway['intervention_point']}")
+            report.append(f"     Robustness: {pathway['sensitivity_robustness']:.3f}")
 
     report.append("\n" + "="*80)
     report.append("KEY FINDINGS")

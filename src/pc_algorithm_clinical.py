@@ -30,9 +30,9 @@ import networkx as nx
 logger = logging.getLogger(__name__)
 
 try:
-    from causal_learn.search.ConstraintBased.PC import pc
-    from causal_learn.utils.cit import fisherz
-    from causal_learn.utils.GraphUtils import GraphUtils
+    from causallearn.search.ConstraintBased.PC import pc
+    from causallearn.utils.cit import fisherz
+    from causallearn.utils.GraphUtils import GraphUtils
     CAUSAL_LEARN_AVAILABLE = True
 except ImportError:
     logger.warning("causal-learn not available. PC algorithm will use correlation fallback.")
