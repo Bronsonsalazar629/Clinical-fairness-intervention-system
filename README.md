@@ -10,8 +10,6 @@ Link to Deployed Dashboard: https://clinical-fairness-intervention-system-b4gwjs
 
 This research project implements an end-to-end system for identifying, understanding, and fixing racial and demographic bias in clinical machine learning systems. Combining causal graph analysis, fairness metrics, and LLM-powered code generation, the system provides clinicians and ML engineers with actionable interventions to deploy fair, safe AI in healthcare.
 
-Key Innovation: We go beyond detecting bias—we identify *why* bias exists (causal pathways) and generate *working code* to fix it.
-
 ---
 
 ## The Problem
@@ -21,44 +19,6 @@ Healthcare algorithms trained on biased historical data perpetuate and amplify d
 > **Obermeyer et al. (2019)** discovered that a widely-used kidney disease algorithm systematically underestimated disease severity for Black patients, leading to reduced access to specialist care. The algorithm used healthcare costs as a proxy for health needs—but Black patients had lower costs due to *existing barriers to care*, creating a feedback loop of bias.
 
 This project addresses this critical challenge: **How do we detect bias, understand its root causes, and deploy fair algorithms in clinical settings?**
-
----
-
-## System Architecture
-
-The system operates in four tiers, each powered by Gemini LLM for clinical validation:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ TIER 1: Causal Graph Refinement (Clinical Plausibility)    │
-│ - Validate edges discovered by PC algorithm                  │
-│ - Expert knowledge integration                               │
-│ - Literature support verification                            │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ TIER 2: Bias Interpretation (Clinical Harm Translation)    │
-│ - Convert statistical metrics to patient harm narratives      │
-│ - Quantify clinical impact (preventable outcomes)            │
-│ - Ethical principle violations (justice, beneficence)       │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ TIER 3: Intervention Rationale (Safety Assessment)         │
-│ - Evaluate clinical safety of fairness interventions         │
-│ - Implementation feasibility for EHR systems                 │
-│ - Model interpretability preservation                        │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ TIER 4: Code Generation (Production Implementation)        │
-│ - Generate validated, runnable intervention code             │
-│ - Syntax, security, and functional testing                   │
-│ - Usage examples and deployment guidance                     │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
 
 ## Key Results
 
